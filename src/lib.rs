@@ -14,7 +14,7 @@ use rayon::iter::ParallelIterator;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ProgressHashingError {
     ErrHashingFile,
-    ErrReadingFilePath
+    ErrCollectingFiles,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -28,7 +28,7 @@ pub enum WorkStatus {
     Started(usize),
     Progress(CurrentFileUpdate),
     Result(HashMap<PathBuf, String>),
-    Error(ProgressHashingError)
+    Error(ProgressHashingError),
 }
 
 fn collect_files_in_dir(dir: &Path) -> Result<Vec<PathBuf>, walkdir::Error> {
@@ -59,7 +59,7 @@ pub async fn progressed_hashing(file_path: &Path) -> impl Stream<Item = WorkStat
         }
         Err(_err) => {
             eprintln!("Error collecting files: {:?}", _err);
-            tx.send(WorkStatus::Error(ProgressHashingError::ErrReadingFilePath)).unwrap();
+            tx.send(WorkStatus::Error(ProgressHashingError::ErrCollectingFiles)).unwrap();
             return UnboundedReceiverStream::new(rx);
         }
     };
