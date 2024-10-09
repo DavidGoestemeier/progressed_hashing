@@ -52,7 +52,7 @@ fn calculate_hash_with_blake3(path: &Path) -> io::Result<String> {
 pub async fn progressed_hashing(file_path: &PathBuf) -> impl Stream<Item = WorkStatus> {
     let (tx, rx) = mpsc::unbounded_channel();
 
-    let file_paths = match collect_files_in_dir(&file_path) {
+    let file_paths = match collect_files_in_dir(file_path) {
         Ok(paths) => {
             tx.send(WorkStatus::Started(paths.len())).unwrap();
             paths
