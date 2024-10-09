@@ -13,8 +13,8 @@ use rayon::iter::ParallelIterator;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ProgressHashingError {
-    PermissionDenied,
-    NotFound
+    ErrHashingFile,
+    ErrReadingFilePath
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -59,7 +59,7 @@ pub async fn progressed_hashing(file_path: &Path) -> impl Stream<Item = WorkStat
         }
         Err(_err) => {
             eprintln!("Error collecting files: {:?}", _err);
-            tx.send(WorkStatus::Error(ProgressHashingError::PermissionDenied)).unwrap();
+            tx.send(WorkStatus::Error(ProgressHashingError::ErrReadingFilePath)).unwrap();
             return UnboundedReceiverStream::new(rx);
         }
     };
@@ -82,7 +82,9 @@ pub async fn progressed_hashing(file_path: &Path) -> impl Stream<Item = WorkStat
                     (path_buf.clone(), hash)
                 },
                 Err(_err) => {
-                    panic!("Error hashing file: {:?}", _err);
+                    eprintln!("Error hashing file: {:?}", _err);
+                    tx.send(WorkStatus::Error(ProgressHashingError::ErrHashingFile)).unwrap();
+                    (path_buf.clone(), "".to_string())
                 }
             }
 
