@@ -11,18 +11,21 @@ use walkdir::WalkDir;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use rayon::iter::ParallelIterator;
 
+/// Enum representing possible errors during the hashing process.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ProgressHashingError {
     ErrHashingFile,
     ErrCollectingFiles,
 }
 
+/// Struct representing the current file update status.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CurrentFileUpdate {
     pub current_file: String,
     pub total_hashed_files: usize,
 }
 
+/// Enum representing the work status of the hashing process.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum WorkStatus {
     Started(usize),
@@ -31,6 +34,15 @@ pub enum WorkStatus {
     Error(ProgressHashingError),
 }
 
+/// Collects all files in the given directory.
+///
+/// # Arguments
+///
+/// * `dir` - A reference to the path of the directory to collect files from.
+///
+/// # Returns
+///
+/// A `Result` containing a vector of `PathBuf` if successful, or a `walkdir::Error` if an error occurs.
 fn collect_files_in_dir(dir: &Path) -> Result<Vec<PathBuf>, walkdir::Error> {
     let mut files = Vec::new();
     for entry in WalkDir::new(dir) {
@@ -42,6 +54,15 @@ fn collect_files_in_dir(dir: &Path) -> Result<Vec<PathBuf>, walkdir::Error> {
     Ok(files)
 }
 
+/// Calculates the BLAKE3 hash of the file at the given path.
+///
+/// # Arguments
+///
+/// * `path` - A reference to the path of the file to hash.
+///
+/// # Returns
+///
+/// An `io::Result` containing the hash as a `String` if successful, or an `io::Error` if an error occurs.
 fn calculate_hash_with_blake3(path: &Path) -> io::Result<String> {
     let mut hasher = blake3::Hasher::new();
     let mut file = std::fs::File::open(path)?;
@@ -49,6 +70,15 @@ fn calculate_hash_with_blake3(path: &Path) -> io::Result<String> {
     Ok(hasher.finalize().to_hex().to_string())
 }
 
+/// Asynchronously hashes files in the given directory, providing progress updates.
+///
+/// # Arguments
+///
+/// * `file_path` - A reference to the path of the directory to hash files from.
+///
+/// # Returns
+///
+/// A stream of `WorkStatus` items representing the progress and result of the hashing process.
 pub async fn progressed_hashing(file_path: &Path) -> impl Stream<Item = WorkStatus> {
     let (tx, rx) = mpsc::unbounded_channel();
 
