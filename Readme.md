@@ -3,6 +3,7 @@
 A very small lib which provides a stream based hashing mechanism for a specified directory and all its content.
 Returns a stream of WorkStatus which can be used to get updates on the progress of the hashing process.
 When the hashing is done, it returns a Result with a HashMap containing the file paths and their respective hashes.
+Hashing is also stream based, so it shouldn't consume too much memory.
 
 ONLY AND FINAL DISCLAIMER:
 Bad code ahead.
