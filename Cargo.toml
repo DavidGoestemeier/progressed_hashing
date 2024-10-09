@@ -1,0 +1,13 @@
+[package]
+name = "ProgressedHasher"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures = "0.3.31"
+rayon = "1.10.0"
+serde = { version = "1.0.210", features = ["derive"] }
+tokio = { version = "1.40.0", features = ["rt"] }
+walkdir = "2.5.0"
+tokio-stream = "0.1.16"
+blake3 = "1.5.4"
