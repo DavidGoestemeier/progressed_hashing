@@ -18,7 +18,7 @@ use ProgressedHasher::progressed_hashing;
 async fn main() {
     let file_path = PathBuf::from("./your_directory"); // Replace with your directory
 
-    let stream = progressed_hashing(&file_path);
+    let mut stream = progressed_hashing(&file_path);
 
     while let Some(work_status) = stream.next().await {
         match work_status {
